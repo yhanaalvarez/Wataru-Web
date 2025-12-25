@@ -779,6 +779,12 @@
           </svg>
           Clear Chat
         </button>
+        <button id="admin-dashboard-menu" role="menuitem">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+          </svg>
+          Admin Dashboard
+        </button>
         <button id="logout-menu" role="menuitem">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -813,6 +819,39 @@
   <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="Image preview">
     <button class="lightbox-close" id="lightbox-close" aria-label="Close image preview">&times;</button>
     <img id="lightbox-img" src="/placeholder.svg" alt="Enlarged image">
+  </div>
+
+  <!-- Admin Dashboard Modal -->
+  <div id="admin-dashboard-modal" class="fixed inset-0 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm z-50 hidden" role="dialog" aria-labelledby="admin-title" aria-modal="true">
+    <div class="auth-card elevation-3 max-w-2xl w-full max-h-96 overflow-y-auto">
+      <div class="text-center mb-6">
+        <h2 id="admin-title" class="text-2xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h2>
+        <p class="text-gray-600 dark:text-gray-400 mt-1">System Features & Controls</p>
+      </div>
+
+      <div id="admin-content" class="hidden">
+        <div class="space-y-3 mb-6">
+          <div id="features-list">
+            <!-- Features will be loaded here -->
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="closeAdminDashboard()" class="flex-1 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white px-4 py-2 rounded hover:opacity-80">Close</button>
+          <button onclick="logoutAdmin()" class="flex-1 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Logout Admin</button>
+        </div>
+      </div>
+
+      <div id="admin-login" class="space-y-4">
+        <div>
+          <label for="admin-pin" class="form-label">Admin PIN</label>
+          <input type="password" id="admin-pin" class="form-input" placeholder="Enter PIN" maxlength="4" autocomplete="off">
+        </div>
+        <div class="flex gap-2">
+          <button onclick="verifyAdminPin()" class="flex-1 auth-button">Verify PIN</button>
+          <button onclick="closeAdminDashboard()" class="flex-1 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white px-4 py-2 rounded">Cancel</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Connection Status Banner -->
@@ -1561,6 +1600,96 @@
           });
       }
     }
+
+    // Admin Dashboard
+    let adminPin = "";
+    
+    function openAdminDashboard() {
+      document.getElementById('admin-dashboard-modal').classList.remove('hidden');
+      document.getElementById('admin-login').classList.remove('hidden');
+      document.getElementById('admin-content').classList.add('hidden');
+      document.getElementById('admin-pin').value = '';
+      document.getElementById('admin-pin').focus();
+      document.getElementById('dropdown-menu').classList.remove('show');
+      document.getElementById('menu-button').setAttribute('aria-expanded', 'false');
+    }
+
+    function closeAdminDashboard() {
+      document.getElementById('admin-dashboard-modal').classList.add('hidden');
+      adminPin = "";
+    }
+
+    function verifyAdminPin() {
+      adminPin = document.getElementById('admin-pin').value;
+      if (!adminPin) {
+        alert('Please enter the PIN');
+        return;
+      }
+
+      fetch(`/admin/features?pin=${adminPin}`)
+        .then(response => {
+          if (!response.ok) throw new Error('Invalid PIN');
+          return response.json();
+        })
+        .then(data => {
+          displayFeatures(data);
+          document.getElementById('admin-login').classList.add('hidden');
+          document.getElementById('admin-content').classList.remove('hidden');
+        })
+        .catch(error => {
+          alert('Invalid admin PIN');
+          document.getElementById('admin-pin').value = '';
+          document.getElementById('admin-pin').focus();
+        });
+    }
+
+    function displayFeatures(features) {
+      const featuresList = document.getElementById('features-list');
+      featuresList.innerHTML = '';
+      
+      Object.keys(features).forEach(key => {
+        const feature = features[key];
+        const featureDiv = document.createElement('div');
+        featureDiv.className = 'flex items-center justify-between p-3 bg-gray-100 dark:bg-gray-700 rounded';
+        featureDiv.innerHTML = `
+          <span class="text-gray-900 dark:text-white font-medium">${feature.name}</span>
+          <label class="flex items-center cursor-pointer">
+            <input type="checkbox" ${feature.enabled ? 'checked' : ''} onchange="toggleFeature('${key}')" class="w-4 h-4">
+            <span class="ml-2 text-sm ${feature.enabled ? 'text-green-600 dark:text-green-400' : 'text-gray-600 dark:text-gray-400'}">
+              ${feature.enabled ? 'ON' : 'OFF'}
+            </span>
+          </label>
+        `;
+        featuresList.appendChild(featureDiv);
+      });
+    }
+
+    function toggleFeature(featureKey) {
+      fetch(`/admin/features/${featureKey}/toggle?pin=${adminPin}`, { method: 'POST' })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            fetch(`/admin/features?pin=${adminPin}`)
+              .then(r => r.json())
+              .then(data => displayFeatures(data));
+          }
+        })
+        .catch(error => console.error('Error toggling feature:', error));
+    }
+
+    function logoutAdmin() {
+      adminPin = "";
+      closeAdminDashboard();
+      alert('Admin session ended');
+    }
+
+    // Add admin dashboard button event listener
+    document.addEventListener('DOMContentLoaded', () => {
+      const adminDashboardMenu = document.getElementById('admin-dashboard-menu');
+      if (adminDashboardMenu) {
+        adminDashboardMenu.addEventListener('click', openAdminDashboard);
+      }
+    });
   </script>
 </body>
 </html>

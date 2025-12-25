@@ -44,6 +44,10 @@ app.use(express.static(path.join(__dirname, "system", "public")));
 const authRoutes = require("./system/routes/auth");
 app.use("/auth", authRoutes);
 
+// Admin routes
+const adminRoutes = require("./system/routes/admin");
+app.use("/admin", adminRoutes);
+
 const { listen } = require("./system/listen");
 listen({ app });
 install();
