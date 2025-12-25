@@ -42,7 +42,14 @@ const features = {
   fileUpload: { name: "File Upload", description: "Allow file sharing", icon: "📁", enabled: false, category: "Features" },
   voiceChat: { name: "Voice Chat", description: "Enable voice communication", icon: "☎️", enabled: false, category: "Features" },
   videoChat: { name: "Video Chat", description: "Enable video communication", icon: "📹", enabled: false, category: "Features" },
-  collaboration: { name: "Collaboration Tools", description: "Real-time collaboration features", icon: "🤝", enabled: false, category: "Features" }
+  collaboration: { name: "Collaboration Tools", description: "Real-time collaboration features", icon: "🤝", enabled: false, category: "Features" },
+  // GitHub Integration
+  githubConnect: { name: "GitHub Account Connect", description: "Allow users to connect GitHub account", icon: "🔗", enabled: false, category: "GitHub" },
+  githubRepoCreate: { name: "Repository Creation", description: "Create new repositories from dashboard", icon: "📦", enabled: false, category: "GitHub" },
+  githubRepoManage: { name: "Repository Management", description: "Manage repositories and settings", icon: "⚙️", enabled: false, category: "GitHub" },
+  githubCodePush: { name: "Code Push to GitHub", description: "Push code directly from chat", icon: "📤", enabled: false, category: "GitHub" },
+  githubCommit: { name: "Auto Commit", description: "Automatic commit and push logs", icon: "✅", enabled: false, category: "GitHub" },
+  githubBranch: { name: "Branch Management", description: "Create and manage git branches", icon: "🌿", enabled: false, category: "GitHub" }
 };
 
 // Verify admin PIN
