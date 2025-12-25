@@ -48,9 +48,19 @@ app.use("/auth", authRoutes);
 const adminRoutes = require("./system/routes/admin");
 app.use("/admin", adminRoutes);
 
+// Games route
+app.get("/games", (req, res) => {
+  res.sendFile(path.join(__dirname, "system", "public", "games.html"));
+});
+
 const { listen } = require("./system/listen");
-listen({ app });
-install();
+const { loadUsers } = require("./system/utility/users");
+
+// Load users data on startup
+loadUsers().then(() => {
+  listen({ app });
+  install();
+});
 
 // Start the server
 app.listen(port, () => {

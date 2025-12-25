@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
 
-// Admin PIN - 1989
-const ADMIN_PIN = "1989";
+// Admin PIN - 198970
+const ADMIN_PIN = "198970";
 
 // Feature toggles with descriptions (30+ features)
 const features = {
@@ -52,15 +52,54 @@ const features = {
   githubBranch: { name: "Branch Management", description: "Create and manage git branches", icon: "🌿", enabled: false, category: "GitHub" }
 };
 
-// Verify admin PIN
-const verifyAdminPin = (req, res, next) => {
-  const { pin } = req.query || req.body;
-  if (pin === ADMIN_PIN) {
-    next();
-  } else {
-    res.status(401).json({ error: "Invalid admin PIN" });
+// Simple CAPTCHA verification
+function generateCaptcha() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let code = '';
+  for (let i = 0; i < 5; i++) {
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
   }
+  return code;
+}
+
+// Store active CAPTCHAs in memory (with 5 minute expiry)
+let activeCaptchas = {};
+
+// Verify admin PIN with CAPTCHA
+const verifyAdminPin = (req, res, next) => {
+  const { pin, captcha, captchaId } = req.query || req.body;
+  
+  if (!pin || !captcha || !captchaId) {
+    return res.status(400).json({ error: "Missing PIN or CAPTCHA" });
+  }
+  
+  if (pin !== ADMIN_PIN) {
+    return res.status(401).json({ error: "Invalid admin PIN" });
+  }
+  
+  if (!activeCaptchas[captchaId] || activeCaptchas[captchaId] !== captcha.toUpperCase()) {
+    return res.status(401).json({ error: "Invalid CAPTCHA" });
+  }
+  
+  delete activeCaptchas[captchaId];
+  next();
 };
+
+// Generate CAPTCHA for admin login
+router.get("/captcha", (req, res) => {
+  const captchaId = Date.now().toString();
+  const code = generateCaptcha();
+  activeCaptchas[captchaId] = code;
+  
+  // Expire CAPTCHA after 5 minutes
+  setTimeout(() => delete activeCaptchas[captchaId], 5 * 60 * 1000);
+  
+  res.json({ 
+    captchaId, 
+    // In production, this should be an image, but for now return text
+    message: `Your CAPTCHA is: ${code}` 
+  });
+});
 
 // Get all features
 router.get("/features", verifyAdminPin, (req, res) => {

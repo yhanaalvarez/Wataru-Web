@@ -65,18 +65,47 @@ router.get("/github",
 router.get("/github/callback",
   passport.authenticate("github", { failureRedirect: "/" }),
   (req, res) => {
+    const { connectGitHub, getUser } = require('../utility/users');
+    connectGitHub(req.user.name || req.user.username, req.user.id);
+    req.session.user = req.user;
     res.json({ success: true, user: req.user });
   }
 );
 
+// Connect GitHub to account
+router.post("/github-connect", (req, res) => {
+  if (!req.session.user) {
+    return res.status(401).json({ error: "Not authenticated" });
+  }
+  
+  const { connectGitHub } = require('../utility/users');
+  const { githubUsername } = req.body;
+  
+  if (connectGitHub(req.session.user.username, githubUsername)) {
+    res.json({ success: true, message: "GitHub connected!" });
+  } else {
+    res.status(400).json({ error: "Failed to connect GitHub" });
+  }
+});
+
 // Regular login
 router.post("/login", (req, res) => {
   const { username, password } = req.body;
-  if (username && password) {
+  const { registerUser, loginUser } = require('../utility/users');
+  
+  // Try to login existing user
+  let result = loginUser(username, password);
+  
+  // If user doesn't exist and password is provided, register them
+  if (!result.success && username && password) {
+    result = registerUser(username, password, `${username}@macky.local`);
+  }
+  
+  if (result.success) {
     req.session.user = { username, id: Date.now() };
-    res.json({ success: true, user: req.session.user });
+    res.json({ success: true, user: result.user });
   } else {
-    res.status(400).json({ error: "Invalid credentials" });
+    res.status(400).json({ error: result.error || "Invalid credentials" });
   }
 });
 

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Games & Casino - MACKY AI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .game-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 1rem;
+      padding: 2rem;
+      color: white;
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+    }
+    .game-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(102, 126, 234, 0.4);
+    }
+    .emoji-button {
+      font-size: 2rem;
+      background: white;
+      color: #667eea;
+      border: none;
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      cursor: pointer;
+      transition: transform 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .emoji-button:hover {
+      transform: scale(1.1);
+    }
+    .balance-display {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+      padding: 1.5rem;
+      border-radius: 1rem;
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 2rem;
+    }
+  </style>
+</head>
+<body class="bg-gray-900 text-white">
+  <div class="max-w-4xl mx-auto p-4">
+    <h1 class="text-4xl font-bold mb-8 text-center">🎮 MACKY Games & Casino 🎮</h1>
+    
+    <div class="balance-display">
+      💰 Balance: <span id="balance">60</span> points
+    </div>
+
+    <!-- GitHub Section -->
+    <div class="mb-8 p-6 bg-gray-800 rounded-lg">
+      <h2 class="text-2xl font-bold mb-4">🔗 Connect GitHub</h2>
+      <p class="mb-4">Connect your GitHub account to create projects directly!</p>
+      <div class="flex gap-2">
+        <input type="text" id="github-username" placeholder="Your GitHub username" class="flex-1 px-4 py-2 bg-gray-700 rounded text-white">
+        <button onclick="connectGitHub()" class="px-6 py-2 bg-purple-600 rounded hover:bg-purple-700">Connect</button>
+      </div>
+      <button onclick="window.location.href='/auth/github'" class="mt-4 w-full px-6 py-3 bg-gray-700 rounded hover:bg-gray-600">Or authorize with OAuth</button>
+    </div>
+
+    <!-- Games Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+      <div class="game-card" onclick="playGame('slots')">
+        <h3 class="text-2xl font-bold mb-2">🎰 Slots</h3>
+        <p>Spin the slots machine and win big!</p>
+        <button class="mt-4 px-4 py-2 bg-white text-purple-600 rounded hover:bg-gray-100">Play Now</button>
+      </div>
+
+      <div class="game-card" onclick="playGame('casino')">
+        <h3 class="text-2xl font-bold mb-2">🎲 Casino</h3>
+        <p>Place your bets in the casino</p>
+        <input type="number" id="casino-bet" placeholder="Bet amount" class="mt-2 w-full px-2 py-1 rounded text-black" min="1">
+        <button onclick="playGame('casino')" class="mt-4 px-4 py-2 bg-white text-purple-600 rounded hover:bg-gray-100">Play Now</button>
+      </div>
+
+      <div class="game-card" onclick="playGame('flip')">
+        <h3 class="text-2xl font-bold mb-2">🪙 Coin Flip</h3>
+        <p>Win big with a coin flip!</p>
+        <input type="number" id="flip-bet" placeholder="Bet amount" class="mt-2 w-full px-2 py-1 rounded text-black" min="1">
+        <button onclick="playGame('flip')" class="mt-4 px-4 py-2 bg-white text-purple-600 rounded hover:bg-gray-100">Play Now</button>
+      </div>
+
+      <div class="game-card" onclick="playGame('dice')">
+        <h3 class="text-2xl font-bold mb-2">🎲 Dice Roll</h3>
+        <p>Roll the dice for fortune!</p>
+        <input type="number" id="dice-bet" placeholder="Bet amount" class="mt-2 w-full px-2 py-1 rounded text-black" min="1">
+        <button onclick="playGame('dice')" class="mt-4 px-4 py-2 bg-white text-purple-600 rounded hover:bg-gray-100">Play Now</button>
+      </div>
+    </div>
+
+    <!-- Message with Emojis -->
+    <div class="bg-gray-800 p-6 rounded-lg mb-8">
+      <h3 class="text-xl font-bold mb-4">💬 Send Message</h3>
+      <textarea id="message-input" placeholder="Type your message..." class="w-full px-4 py-2 bg-gray-700 rounded text-white mb-4"></textarea>
+      <div class="flex gap-2 mb-4">
+        <button class="emoji-button" onclick="addEmoji('👍')">👍</button>
+        <button class="emoji-button" onclick="addEmoji('🥲')">🥲</button>
+        <button class="emoji-button" onclick="addEmoji('❤️')">❤️</button>
+      </div>
+      <button onclick="sendMessage()" class="w-full px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 rounded hover:from-purple-700 hover:to-pink-700">Send Message 📤</button>
+    </div>
+
+    <!-- Leaderboard -->
+    <div class="bg-gray-800 p-6 rounded-lg">
+      <h3 class="text-2xl font-bold mb-4">🏆 Top Users</h3>
+      <button onclick="loadLeaderboard()" class="w-full px-6 py-2 mb-4 bg-purple-600 rounded hover:bg-purple-700">Refresh Leaderboard</button>
+      <div id="leaderboard" class="space-y-2">
+        <p class="text-gray-400">Loading...</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentUser = null;
+
+    // Load user on page load
+    async function loadUser() {
+      const res = await fetch('/auth/status');
+      const data = await res.json();
+      if (data.authenticated) {
+        currentUser = data.user;
+        document.title = `Games - ${data.user.username}`;
+      } else {
+        window.location.href = '/';
+      }
+    }
+
+    async function playGame(game) {
+      let bet = '';
+      if (game === 'casino') bet = document.getElementById('casino-bet').value || '10';
+      if (game === 'flip') bet = document.getElementById('flip-bet').value || '10';
+      if (game === 'dice') bet = document.getElementById('dice-bet').value || '10';
+      
+      alert(`🎮 Playing ${game}${bet ? ' with bet: ' + bet : ''}...\n\nGame results coming soon!`);
+    }
+
+    function addEmoji(emoji) {
+      const textarea = document.getElementById('message-input');
+      textarea.value += emoji;
+    }
+
+    async function sendMessage() {
+      const message = document.getElementById('message-input').value;
+      if (!message.trim()) {
+        alert('Please type a message!');
+        return;
+      }
+      
+      alert(`Message sent: ${message} 📤`);
+      document.getElementById('message-input').value = '';
+    }
+
+    async function connectGitHub() {
+      const username = document.getElementById('github-username').value;
+      if (!username) {
+        alert('Please enter your GitHub username');
+        return;
+      }
+      
+      const res = await fetch('/auth/github-connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ githubUsername: username })
+      });
+      
+      const data = await res.json();
+      alert(data.message || data.error);
+    }
+
+    async function loadLeaderboard() {
+      // Mock leaderboard for now
+      const leaderboard = [
+        { rank: 1, username: 'player1', balance: 500, medal: '🥇' },
+        { rank: 2, username: 'player2', balance: 450, medal: '🥈' },
+        { rank: 3, username: 'player3', balance: 400, medal: '🥉' }
+      ];
+      
+      const html = leaderboard.map(user => 
+        `<div class="p-3 bg-gray-700 rounded flex justify-between">
+          <span>${user.medal} ${user.username}</span>
+          <span class="font-bold">${user.balance} points</span>
+        </div>`
+      ).join('');
+      
+      document.getElementById('leaderboard').innerHTML = html;
+    }
+
+    // Initialize
+    loadUser();
+    loadLeaderboard();
+  </script>
+</body>
+</html>
