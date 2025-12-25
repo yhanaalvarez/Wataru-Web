@@ -785,6 +785,18 @@
           </svg>
           Admin Dashboard
         </button>
+        <button id="about-menu" role="menuitem">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          About MACKY AI
+        </button>
+        <button id="help-menu" role="menuitem">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          How to Use
+        </button>
         <button id="logout-menu" role="menuitem">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -838,9 +850,28 @@
       </div>
 
       <div id="admin-content" class="hidden p-6">
-        <!-- Features by Category -->
-        <div id="features-container" class="space-y-6">
-          <!-- Features will be loaded here grouped by category -->
+        <!-- Tabs for Admin Features -->
+        <div class="flex gap-2 mb-6 border-b border-gray-200 dark:border-gray-700">
+          <button onclick="switchAdminTab('features')" id="features-tab" class="px-4 py-2 font-bold text-blue-600 dark:text-blue-400 border-b-2 border-blue-600">🎛️ Features</button>
+          <button onclick="switchAdminTab('logs')" id="logs-tab" class="px-4 py-2 font-bold text-gray-600 dark:text-gray-400 border-b-2 border-transparent hover:border-gray-400">📋 Logs</button>
+        </div>
+
+        <!-- Features Tab -->
+        <div id="features-content" class="space-y-6">
+          <div id="features-container" class="space-y-6">
+            <!-- Features will be loaded here grouped by category -->
+          </div>
+        </div>
+
+        <!-- Logs Tab -->
+        <div id="logs-content" class="hidden">
+          <div class="mb-4 flex gap-2">
+            <button onclick="loadLogsData()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded font-medium">🔄 Refresh Logs</button>
+            <button onclick="clearAllLogs()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded font-medium">🗑️ Clear All</button>
+          </div>
+          <div id="logs-list" class="bg-gray-100 dark:bg-gray-800 p-4 rounded max-h-80 overflow-y-auto">
+            <p class="text-gray-600 dark:text-gray-400 text-center">Loading logs...</p>
+          </div>
         </div>
 
         <!-- Action Buttons -->
@@ -861,6 +892,103 @@
           <button onclick="verifyAdminPin()" class="flex-1 auth-button bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">Verify PIN</button>
           <button onclick="closeAdminDashboard()" class="flex-1 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white px-4 py-3 rounded">Cancel</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- About MACKY AI Modal -->
+  <div id="about-modal" class="fixed inset-0 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm z-50 hidden" role="dialog" aria-labelledby="about-title" aria-modal="true">
+    <div class="auth-card elevation-3 w-full max-w-2xl">
+      <div class="text-center mb-6">
+        <h2 id="about-title" class="text-4xl font-black bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">MACKY AI</h2>
+        <p class="text-gray-600 dark:text-gray-400">Professional AI Chat Assistant</p>
+      </div>
+
+      <div class="space-y-4 mb-6">
+        <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+          <p class="text-sm text-gray-700 dark:text-gray-300"><span class="font-bold">Model Version:</span> 1.5.1</p>
+          <p class="text-sm text-gray-700 dark:text-gray-300"><span class="font-bold">Developer:</span> Manuelson Yasis</p>
+          <p class="text-sm text-gray-700 dark:text-gray-300"><span class="font-bold">Status:</span> <span class="text-green-600 font-semibold">🟢 Online</span></p>
+        </div>
+
+        <div class="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg border border-blue-200 dark:border-blue-700">
+          <h3 class="font-bold text-blue-900 dark:text-blue-100 mb-2">✨ Features</h3>
+          <ul class="text-sm text-blue-800 dark:text-blue-200 space-y-1">
+            <li>• ChatGPT & Gemini AI Integration</li>
+            <li>• Real-time Chat Support</li>
+            <li>• Admin Dashboard with 30+ Features</li>
+            <li>• User Activity Logging</li>
+            <li>• Dark Mode Support</li>
+            <li>• OAuth Authentication (Google & GitHub)</li>
+          </ul>
+        </div>
+
+        <div class="bg-purple-50 dark:bg-purple-900 p-4 rounded-lg border border-purple-200 dark:border-purple-700">
+          <h3 class="font-bold text-purple-900 dark:text-purple-100 mb-2">🎯 About</h3>
+          <p class="text-sm text-purple-800 dark:text-purple-200">
+            MACKY AI is a professional-grade AI chat assistant designed to provide intelligent responses, advanced analytics, and comprehensive system management capabilities. Built with modern web technologies and cutting-edge AI models.
+          </p>
+        </div>
+      </div>
+
+      <div class="flex gap-2">
+        <button onclick="closeAboutModal()" class="flex-1 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white px-4 py-3 rounded font-medium hover:opacity-80">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- How To Use Modal -->
+  <div id="help-modal" class="fixed inset-0 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm z-50 hidden" role="dialog" aria-labelledby="help-title" aria-modal="true">
+    <div class="auth-card elevation-3 w-full max-w-2xl max-h-screen overflow-y-auto">
+      <div class="text-center mb-6">
+        <h2 id="help-title" class="text-3xl font-bold text-gray-900 dark:text-white">📖 How to Use MACKY AI</h2>
+      </div>
+
+      <div class="space-y-4 mb-6 text-sm text-gray-700 dark:text-gray-300">
+        <div>
+          <h3 class="font-bold text-lg text-gray-900 dark:text-white mb-2">1️⃣ Getting Started</h3>
+          <p>Sign in using your username/password or connect with Google/GitHub. Once logged in, you'll see the chat interface.</p>
+        </div>
+
+        <div>
+          <h3 class="font-bold text-lg text-gray-900 dark:text-white mb-2">2️⃣ Sending Messages</h3>
+          <p>Type your message in the input field at the bottom and press Enter or click the send button. MACKY AI will respond with intelligent answers powered by ChatGPT or Gemini.</p>
+        </div>
+
+        <div>
+          <h3 class="font-bold text-lg text-gray-900 dark:text-white mb-2">3️⃣ Chat Features</h3>
+          <ul class="list-disc list-inside space-y-1">
+            <li>View your conversation history</li>
+            <li>Attach and share media files</li>
+            <li>Toggle dark/light theme</li>
+            <li>Clear chat history anytime</li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="font-bold text-lg text-gray-900 dark:text-white mb-2">4️⃣ Admin Features (PIN: 1989)</h3>
+          <ul class="list-disc list-inside space-y-1">
+            <li>Access Admin Dashboard from menu</li>
+            <li>Toggle 30+ system features on/off</li>
+            <li>Monitor system performance</li>
+            <li>View user activity logs</li>
+            <li>Control AI Guard (blocks user messages)</li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="font-bold text-lg text-gray-900 dark:text-white mb-2">5️⃣ Tips & Tricks</h3>
+          <ul class="list-disc list-inside space-y-1">
+            <li>Use natural language for better responses</li>
+            <li>Ask follow-up questions for more details</li>
+            <li>Enable Dark Mode for comfortable viewing</li>
+            <li>Check logs to see your activity history</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="flex gap-2">
+        <button onclick="closeHelpModal()" class="flex-1 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white px-4 py-3 rounded font-medium hover:opacity-80">Close</button>
       </div>
     </div>
   </div>
@@ -1763,13 +1891,113 @@
       closeAdminDashboard();
     }
 
-    // Add admin dashboard button event listener
+    // About & Help Modals
+    function openAboutModal() {
+      document.getElementById('about-modal').classList.remove('hidden');
+    }
+
+    function closeAboutModal() {
+      document.getElementById('about-modal').classList.add('hidden');
+    }
+
+    function openHelpModal() {
+      document.getElementById('help-modal').classList.remove('hidden');
+    }
+
+    function closeHelpModal() {
+      document.getElementById('help-modal').classList.add('hidden');
+    }
+
+    // Admin Tab Switching
+    function switchAdminTab(tab) {
+      document.getElementById('features-content').classList.toggle('hidden', tab !== 'features');
+      document.getElementById('logs-content').classList.toggle('hidden', tab !== 'logs');
+      
+      document.getElementById('features-tab').classList.toggle('text-blue-600 dark:text-blue-400 border-b-2 border-blue-600', tab === 'features');
+      document.getElementById('features-tab').classList.toggle('text-gray-600 dark:text-gray-400 border-b-2 border-transparent', tab !== 'features');
+      
+      document.getElementById('logs-tab').classList.toggle('text-blue-600 dark:text-blue-400 border-b-2 border-blue-600', tab === 'logs');
+      document.getElementById('logs-tab').classList.toggle('text-gray-600 dark:text-gray-400 border-b-2 border-transparent', tab !== 'logs');
+      
+      if (tab === 'logs') {
+        loadLogsData();
+      }
+    }
+
+    // Load Logs
+    function loadLogsData() {
+      fetch(`/admin/logs?pin=${adminPin}`)
+        .then(r => r.json())
+        .then(logs => {
+          const logsList = document.getElementById('logs-list');
+          if (logs.length === 0) {
+            logsList.innerHTML = '<p class="text-gray-600 dark:text-gray-400 text-center">No logs available</p>';
+            return;
+          }
+          logsList.innerHTML = logs.map(log => `
+            <div class="border-b border-gray-300 dark:border-gray-700 py-2 text-xs">
+              <p class="font-bold text-gray-900 dark:text-white">${log.username}</p>
+              <p class="text-gray-700 dark:text-gray-300">${log.action}</p>
+              <p class="text-gray-500 dark:text-gray-500">${new Date(log.timestamp).toLocaleString()}</p>
+            </div>
+          `).join('');
+        })
+        .catch(e => console.error('Error loading logs:', e));
+    }
+
+    function clearAllLogs() {
+      if (!confirm('Are you sure? This will delete all logs.')) return;
+      fetch(`/admin/logs/clear?pin=${adminPin}`, { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+          if (data.success) {
+            loadLogsData();
+          }
+        });
+    }
+
+    // AI Guard Message Blocking
+    let aiGuardEnabled = false;
+
+    function checkAiGuardStatus() {
+      fetch('/admin/status')
+        .then(r => r.json())
+        .then(data => {
+          aiGuardEnabled = data.features.aiGuard || false;
+        });
+    }
+
+    // Add menu button listeners
     document.addEventListener('DOMContentLoaded', () => {
       const adminDashboardMenu = document.getElementById('admin-dashboard-menu');
+      const aboutMenu = document.getElementById('about-menu');
+      const helpMenu = document.getElementById('help-menu');
+      
       if (adminDashboardMenu) {
         adminDashboardMenu.addEventListener('click', openAdminDashboard);
       }
+      if (aboutMenu) {
+        aboutMenu.addEventListener('click', openAboutModal);
+      }
+      if (helpMenu) {
+        helpMenu.addEventListener('click', openHelpModal);
+      }
+      
+      checkAiGuardStatus();
+      setInterval(checkAiGuardStatus, 5000); // Check every 5 seconds
     });
+
+    // Override send function to check AI Guard
+    const originalSendCommand = window.sendCommand;
+    window.sendCommand = function(command) {
+      if (aiGuardEnabled) {
+        alert('⛔ AI Guard is enabled. Messages are currently blocked by the administrator.');
+        return;
+      }
+      if (originalSendCommand) {
+        originalSendCommand(command);
+      }
+    };
   </script>
 </body>
 </html>
