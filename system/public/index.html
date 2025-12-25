@@ -823,32 +823,43 @@
 
   <!-- Admin Dashboard Modal -->
   <div id="admin-dashboard-modal" class="fixed inset-0 flex items-center justify-center p-4 bg-black bg-opacity-50 backdrop-blur-sm z-50 hidden" role="dialog" aria-labelledby="admin-title" aria-modal="true">
-    <div class="auth-card elevation-3 max-w-2xl w-full max-h-96 overflow-y-auto">
-      <div class="text-center mb-6">
-        <h2 id="admin-title" class="text-2xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h2>
-        <p class="text-gray-600 dark:text-gray-400 mt-1">System Features & Controls</p>
-      </div>
-
-      <div id="admin-content" class="hidden">
-        <div class="space-y-3 mb-6">
-          <div id="features-list">
-            <!-- Features will be loaded here -->
+    <div class="auth-card elevation-3 w-full max-w-4xl max-h-screen overflow-y-auto">
+      <div class="sticky top-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 pb-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 id="admin-title" class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">⚙️ Admin Dashboard</h2>
+            <p class="text-gray-600 dark:text-gray-400 mt-1 text-sm">System Features & Real-time Controls</p>
+          </div>
+          <div id="system-status" class="text-right text-sm">
+            <p class="text-green-600 dark:text-green-400 font-semibold">🟢 Online</p>
+            <p class="text-gray-600 dark:text-gray-400" id="system-uptime">Loading...</p>
           </div>
         </div>
-        <div class="flex gap-2">
-          <button onclick="closeAdminDashboard()" class="flex-1 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white px-4 py-2 rounded hover:opacity-80">Close</button>
-          <button onclick="logoutAdmin()" class="flex-1 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Logout Admin</button>
+      </div>
+
+      <div id="admin-content" class="hidden p-6">
+        <!-- Features by Category -->
+        <div id="features-container" class="space-y-6">
+          <!-- Features will be loaded here grouped by category -->
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex gap-2 mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+          <button onclick="refreshAdminDashboard()" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded font-medium transition">🔄 Refresh Status</button>
+          <button onclick="closeAdminDashboard()" class="flex-1 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white px-4 py-3 rounded font-medium hover:opacity-80">Close</button>
+          <button onclick="logoutAdmin()" class="flex-1 bg-red-500 hover:bg-red-600 text-white px-4 py-3 rounded font-medium transition">🚪 Logout Admin</button>
         </div>
       </div>
 
-      <div id="admin-login" class="space-y-4">
+      <div id="admin-login" class="p-6 space-y-4">
         <div>
-          <label for="admin-pin" class="form-label">Admin PIN</label>
-          <input type="password" id="admin-pin" class="form-input" placeholder="Enter PIN" maxlength="4" autocomplete="off">
+          <label for="admin-pin" class="form-label">🔐 Admin PIN</label>
+          <input type="password" id="admin-pin" class="form-input text-2xl tracking-widest text-center" placeholder="••••" maxlength="4" autocomplete="off">
         </div>
+        <p class="text-xs text-gray-500 dark:text-gray-400 text-center">Enter the 4-digit PIN to access admin features</p>
         <div class="flex gap-2">
-          <button onclick="verifyAdminPin()" class="flex-1 auth-button">Verify PIN</button>
-          <button onclick="closeAdminDashboard()" class="flex-1 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white px-4 py-2 rounded">Cancel</button>
+          <button onclick="verifyAdminPin()" class="flex-1 auth-button bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">Verify PIN</button>
+          <button onclick="closeAdminDashboard()" class="flex-1 bg-gray-300 dark:bg-gray-600 text-gray-900 dark:text-white px-4 py-3 rounded">Cancel</button>
         </div>
       </div>
     </div>
@@ -1603,6 +1614,7 @@
 
     // Admin Dashboard
     let adminPin = "";
+    let adminRefreshInterval = null;
     
     function openAdminDashboard() {
       document.getElementById('admin-dashboard-modal').classList.remove('hidden');
@@ -1616,6 +1628,10 @@
 
     function closeAdminDashboard() {
       document.getElementById('admin-dashboard-modal').classList.add('hidden');
+      if (adminRefreshInterval) {
+        clearInterval(adminRefreshInterval);
+        adminRefreshInterval = null;
+      }
       adminPin = "";
     }
 
@@ -1633,8 +1649,18 @@
         })
         .then(data => {
           displayFeatures(data);
+          updateSystemStatus();
           document.getElementById('admin-login').classList.add('hidden');
           document.getElementById('admin-content').classList.remove('hidden');
+          
+          // Auto-refresh every 3 seconds
+          if (adminRefreshInterval) clearInterval(adminRefreshInterval);
+          adminRefreshInterval = setInterval(() => {
+            fetch(`/admin/features?pin=${adminPin}`)
+              .then(r => r.json())
+              .then(data => displayFeatures(data));
+            updateSystemStatus();
+          }, 3000);
         })
         .catch(error => {
           alert('Invalid admin PIN');
@@ -1644,24 +1670,68 @@
     }
 
     function displayFeatures(features) {
-      const featuresList = document.getElementById('features-list');
-      featuresList.innerHTML = '';
+      const container = document.getElementById('features-container');
+      const categories = {};
       
+      // Group features by category
       Object.keys(features).forEach(key => {
         const feature = features[key];
-        const featureDiv = document.createElement('div');
-        featureDiv.className = 'flex items-center justify-between p-3 bg-gray-100 dark:bg-gray-700 rounded';
-        featureDiv.innerHTML = `
-          <span class="text-gray-900 dark:text-white font-medium">${feature.name}</span>
-          <label class="flex items-center cursor-pointer">
-            <input type="checkbox" ${feature.enabled ? 'checked' : ''} onchange="toggleFeature('${key}')" class="w-4 h-4">
-            <span class="ml-2 text-sm ${feature.enabled ? 'text-green-600 dark:text-green-400' : 'text-gray-600 dark:text-gray-400'}">
-              ${feature.enabled ? 'ON' : 'OFF'}
-            </span>
-          </label>
-        `;
-        featuresList.appendChild(featureDiv);
+        const cat = feature.category || 'Other';
+        if (!categories[cat]) categories[cat] = [];
+        categories[cat].push({ key, ...feature });
       });
+
+      container.innerHTML = '';
+      
+      Object.keys(categories).sort().forEach(category => {
+        const categoryDiv = document.createElement('div');
+        categoryDiv.className = 'border border-gray-200 dark:border-gray-700 rounded-lg p-4';
+        
+        const titleDiv = document.createElement('h3');
+        titleDiv.className = 'text-lg font-bold text-gray-900 dark:text-white mb-3 pb-2 border-b border-gray-200 dark:border-gray-700';
+        titleDiv.textContent = `📁 ${category}`;
+        categoryDiv.appendChild(titleDiv);
+        
+        const featuresDiv = document.createElement('div');
+        featuresDiv.className = 'space-y-2';
+        
+        categories[category].forEach(feature => {
+          const featureDiv = document.createElement('div');
+          featureDiv.className = `flex items-center justify-between p-4 bg-gradient-to-r ${feature.enabled ? 'from-green-50 to-emerald-50 dark:from-green-900 dark:to-emerald-900' : 'from-gray-100 to-gray-50 dark:from-gray-800 dark:to-gray-700'} rounded-lg border ${feature.enabled ? 'border-green-200 dark:border-green-700' : 'border-gray-200 dark:border-gray-600'} transition-all`;
+          
+          featureDiv.innerHTML = `
+            <div class="flex-1">
+              <div class="flex items-center gap-2">
+                <span class="text-2xl">${feature.icon}</span>
+                <div>
+                  <p class="font-bold text-gray-900 dark:text-white">${feature.name}</p>
+                  <p class="text-xs text-gray-600 dark:text-gray-400">${feature.description}</p>
+                </div>
+              </div>
+            </div>
+            <label class="flex items-center cursor-pointer gap-2 ml-4">
+              <div class="relative">
+                <input type="checkbox" ${feature.enabled ? 'checked' : ''} onchange="toggleFeature('${feature.key}')" class="sr-only peer">
+                <div class="w-11 h-6 bg-gray-300 peer-checked:bg-green-500 rounded-full peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+              </div>
+              <span class="text-sm font-bold ${feature.enabled ? 'text-green-600 dark:text-green-400' : 'text-gray-600 dark:text-gray-400'}">${feature.enabled ? '✓ ON' : '✗ OFF'}</span>
+            </label>
+          `;
+          featuresDiv.appendChild(featureDiv);
+        });
+        
+        categoryDiv.appendChild(featuresDiv);
+        container.appendChild(categoryDiv);
+      });
+    }
+
+    function updateSystemStatus() {
+      fetch(`/admin/system?pin=${adminPin}`)
+        .then(r => r.json())
+        .then(data => {
+          document.getElementById('system-uptime').textContent = `⏱️ ${data.uptime} | 💾 ${data.memory.used}/${data.memory.total}`;
+        })
+        .catch(e => console.error('Error updating status:', e));
     }
 
     function toggleFeature(featureKey) {
@@ -1669,6 +1739,7 @@
         .then(response => response.json())
         .then(data => {
           if (data.success) {
+            // Trigger instant update without waiting for interval
             fetch(`/admin/features?pin=${adminPin}`)
               .then(r => r.json())
               .then(data => displayFeatures(data));
@@ -1677,10 +1748,19 @@
         .catch(error => console.error('Error toggling feature:', error));
     }
 
+    function refreshAdminDashboard() {
+      fetch(`/admin/features?pin=${adminPin}`)
+        .then(r => r.json())
+        .then(data => {
+          displayFeatures(data);
+          updateSystemStatus();
+        });
+    }
+
     function logoutAdmin() {
+      if (adminRefreshInterval) clearInterval(adminRefreshInterval);
       adminPin = "";
       closeAdminDashboard();
-      alert('Admin session ended');
     }
 
     // Add admin dashboard button event listener
