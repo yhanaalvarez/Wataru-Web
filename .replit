@@ -1,4 +1,4 @@
-modules = ["nodejs-20", "web", "nix"]
+modules = ["web", "nodejs-20", "nix"]
 hidden = [".config", "package-lock.json"]
 run = "node index.js"
 
@@ -6,7 +6,7 @@ run = "node index.js"
 requiredFiles = [".replit", "replit.nix", "package.json", "package-lock.json"]
 
 [nix]
-channel = "stable-24_05"
+channel = "stable-25_05"
 
 [unitTest]
 language = "nodejs"
@@ -18,6 +18,10 @@ ignorePorts = false
 
 [[ports]]
 localPort = 3000
+externalPort = 80
+
+[[ports]]
+localPort = 5000
 externalPort = 80
 
 [workflows]
@@ -36,10 +40,13 @@ args = "MACKY AI Server"
 name = "MACKY AI Server"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "cd /home/user/work && node main.js"
-waitForPort = 5000
-
 [workflows.workflow.metadata]
 outputType = "webview"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "node main.js"
+waitForPort = 5000
+
+[agent]
+expertMode = true
