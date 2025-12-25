@@ -97,8 +97,9 @@ exports.listen = async function ({ app }) {
         return res.status(401).json({ fail: true, message: "Invalid credentials." });
       }
       const token = generateToken();
-      await dbRun("INSERT INTO sessions (user_id, token) VALUES (?, ?)", [user.id, token]);
-      res.json({ fail: false, session: token, message: "Login successful." });
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+      await dbRun("INSERT INTO sessions (user_id, token, expires_at) VALUES (?, ?, ?)", [user.id, token, expiresAt]);
+      res.json({ fail: false, session: token, expiresAt, message: "Login successful." });
     } catch (error) {
       console.error("Error in /api/login:", error);
       res.status(500).json({ fail: true, message: "An error occurred while logging in." });

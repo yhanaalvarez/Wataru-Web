@@ -31,6 +31,7 @@ db.serialize(() => {
       user_id INTEGER,
       token TEXT UNIQUE,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      expires_at DATETIME,
       FOREIGN KEY(user_id) REFERENCES users(id)
     )
   `);

@@ -19,3 +19,27 @@ ignorePorts = false
 [[ports]]
 localPort = 3000
 externalPort = 80
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "MACKY AI Server"
+
+[[workflows.workflow]]
+name = "MACKY AI Server"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd /home/user/work && node main.js"
+waitForPort = 5000
+
+[workflows.workflow.metadata]
+outputType = "webview"
