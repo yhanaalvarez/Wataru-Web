@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>MACKY AI - News Updates</title>
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              DEFAULT: '#2563eb',
+              50: '#eff6ff',
+              100: '#dbeafe',
+              200: '#bfdbfe',
+              300: '#93c5fd',
+              400: '#60a5fa',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+              800: '#1e40af',
+              900: '#1e3a8a',
+              950: '#172554',
+            },
+            dark: {
+              bg: '#121212',
+              card: '#1e1e1e',
+              input: '#2a2a2a',
+              border: '#333333',
+              text: '#e4e6eb',
+              secondary: '#b0b3b8',
+            },
+          },
+        },
+        fontFamily: {
+          sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+        },
+      },
+    }
+  </script>
+  <style>
+    @layer utilities {
+      .scrollbar-hide::-webkit-scrollbar { display: none; }
+      .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background-color: rgba(156, 163, 175, 0.5);
+      border-radius: 3px;
+    }
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+      background-color: rgba(75, 85, 99, 0.5);
+    }
+    .news-card {
+      background-color: white;
+      border-radius: 0.75rem;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+    .dark .news-card {
+      background-color: #1e1e1e;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+    .news-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    .dark .news-card:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+    .loading-spinner {
+      border: 4px solid rgba(0, 0, 0, 0.1);
+      border-top: 4px solid #2563eb;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-900 antialiased dark:bg-dark-bg dark:text-dark-text" style="height: 100vh;">
+  <div class="flex flex-col h-full">
+    <!-- Header -->
+    <header class="bg-white dark:bg-dark-card shadow-sm sticky top-0 z-30">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <h1 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">📰 MACKY News</h1>
+            <p class="text-sm text-gray-600 dark:text-gray-400">Latest news from Cebu</p>
+          </div>
+          <button onclick="goBack()" class="px-4 py-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-600 transition">← Back</button>
+        </div>
+        
+        <!-- Search Bar -->
+        <div class="relative">
+          <input 
+            type="text" 
+            id="search-input" 
+            placeholder="Search news..." 
+            class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-dark-input text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onkeyup="searchNews()"
+          />
+          <svg xmlns="http://www.w3.org/2000/svg" class="absolute right-3 top-3 h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-1 overflow-y-auto custom-scrollbar">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div id="loading" class="flex justify-center items-center py-12">
+          <div class="loading-spinner"></div>
+        </div>
+        
+        <div id="news-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- News cards will be inserted here -->
+        </div>
+
+        <div id="no-results" class="hidden text-center py-12">
+          <p class="text-gray-500 dark:text-gray-400 text-lg">No news found. Try a different search.</p>
+        </div>
+
+        <div id="error-message" class="hidden bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 p-4 rounded-lg">
+          <p id="error-text">Failed to load news. Please try again later.</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+  <script>
+    const API_KEY = 'pub_5d2b84c2edd44311a5f11e64eae8c938';
+    const API_URL = `https://newsdata.io/api/1/latest?apikey=${API_KEY}&q=Cebu`;
+    
+    let allNews = [];
+    let likes = JSON.parse(localStorage.getItem('newsLikes')) || {};
+
+    const initTheme = () => {
+      const savedTheme = localStorage.getItem("theme");
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
+        document.documentElement.classList.add("dark");
+      }
+    };
+
+    const goBack = () => {
+      window.location.href = '/';
+    };
+
+    const fetchNews = async () => {
+      try {
+        document.getElementById('loading').classList.remove('hidden');
+        document.getElementById('error-message').classList.add('hidden');
+        document.getElementById('no-results').classList.add('hidden');
+
+        const response = await axios.get(API_URL);
+        
+        if (response.data && response.data.results) {
+          allNews = response.data.results;
+          displayNews(allNews);
+        } else {
+          throw new Error('No news data available');
+        }
+      } catch (error) {
+        console.error('Error fetching news:', error);
+        document.getElementById('error-message').classList.remove('hidden');
+        document.getElementById('error-text').textContent = error.message || 'Failed to load news. Please try again later.';
+      } finally {
+        document.getElementById('loading').classList.add('hidden');
+      }
+    };
+
+    const displayNews = (newsArray) => {
+      const container = document.getElementById('news-container');
+      
+      if (newsArray.length === 0) {
+        document.getElementById('no-results').classList.remove('hidden');
+        container.innerHTML = '';
+        return;
+      }
+
+      container.innerHTML = newsArray.map((article, index) => {
+        const imageUrl = article.image_url || 'https://via.placeholder.com/400x250?text=No+Image';
+        const title = article.title || 'No title';
+        const description = article.description || 'No description available';
+        const source = article.source_id || 'Unknown source';
+        const pubDate = new Date(article.pubDate).toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: 'short', 
+          day: 'numeric' 
+        });
+        const linkId = `article-${index}`;
+        const likeCount = likes[linkId] || 0;
+        const isLiked = likes[linkId] ? true : false;
+
+        return `
+          <div class="news-card overflow-hidden">
+            <img src="${imageUrl}" alt="${title}" class="w-full h-48 object-cover bg-gray-200 dark:bg-gray-700" onerror="this.src='https://via.placeholder.com/400x250?text=No+Image'">
+            
+            <div class="p-4">
+              <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                <span class="font-semibold">${source}</span> • ${pubDate}
+              </p>
+              
+              <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-2 line-clamp-2">
+                ${title}
+              </h3>
+              
+              <p class="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2">
+                ${description}
+              </p>
+
+              <a href="${article.link}" target="_blank" rel="noopener noreferrer" class="text-blue-600 dark:text-blue-400 text-sm font-medium hover:underline block mb-4">
+                Read more →
+              </a>
+
+              <!-- Action buttons -->
+              <div class="flex gap-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                <button onclick="toggleLike('${linkId}')" class="flex items-center gap-1 flex-1 px-3 py-2 rounded-lg text-sm font-medium transition ${isLiked ? 'bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'}">
+                  <span>${isLiked ? '❤️' : '🤍'}</span>
+                  <span>${likeCount}</span>
+                </button>
+
+                <button onclick="shareToFacebook('${encodeURIComponent(article.link)}', '${encodeURIComponent(title)}')" class="flex items-center gap-1 flex-1 px-3 py-2 rounded-lg text-sm font-medium bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-800 transition" title="Share on Facebook">
+                  f
+                </button>
+
+                <button onclick="shareToInstagram('${encodeURIComponent(title)}')" class="flex items-center gap-1 flex-1 px-3 py-2 rounded-lg text-sm font-medium bg-pink-100 dark:bg-pink-900 text-pink-600 dark:text-pink-400 hover:bg-pink-200 dark:hover:bg-pink-800 transition" title="Share on Instagram">
+                  📸
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('no-results').classList.add('hidden');
+    };
+
+    const searchNews = () => {
+      const query = document.getElementById('search-input').value.toLowerCase();
+      
+      if (!query) {
+        displayNews(allNews);
+        return;
+      }
+
+      const filtered = allNews.filter(article => 
+        (article.title && article.title.toLowerCase().includes(query)) ||
+        (article.description && article.description.toLowerCase().includes(query))
+      );
+
+      displayNews(filtered);
+    };
+
+    const toggleLike = (articleId) => {
+      if (likes[articleId]) {
+        delete likes[articleId];
+      } else {
+        likes[articleId] = true;
+      }
+      
+      localStorage.setItem('newsLikes', JSON.stringify(likes));
+      displayNews(allNews);
+    };
+
+    const shareToFacebook = (url, title) => {
+      const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${title}`;
+      window.open(facebookUrl, 'facebook-share', 'width=600,height=400');
+    };
+
+    const shareToInstagram = (title) => {
+      // Instagram doesn't support direct web sharing, so we'll copy the title to clipboard
+      navigator.clipboard.writeText(title).then(() => {
+        alert('📸 Title copied to clipboard! Paste it in your Instagram caption.');
+      }).catch(() => {
+        alert('Could not copy to clipboard. Please share manually on Instagram.');
+      });
+    };
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      initTheme();
+      fetchNews();
+    });
+  </script>
+</body>
+</html>
